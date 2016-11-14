@@ -1,3 +1,5 @@
+require 'faraday'
+
 class BaconsController < ApplicationController
   before_filter :authenticate, only: [:graphs, :stats]
 
@@ -31,7 +33,29 @@ class BaconsController < ApplicationController
       end
     end
 
+    send_analytic_ingester_event(params[:fastfile_id])
+
     render json: { success: true }
+  end
+
+  def send_analytic_ingester_event(fastfile_id)
+    url = ENV["ANALYTIC_INGESTER_URL"]
+    @conn = Faraday.new(:url => url) do |faraday|
+      faraday.adapter  Faraday.default_adapter  # make requests with Net::HTTP
+    end
+
+    begin
+        @conn.post('', payload, { 'Content-Type' => 'application/json' } ) do |req|
+          req.options.open_timeout = 0.5
+          req.options.timeout = 1.0
+          yield(req) if block_given?
+        end
+      rescue Faraday::Error::TimeoutError, Faraday::ConnectionFailed => err
+        env = { :status => 504, :body => err }
+        Faraday::Response.new(env)
+      end
+
+
   end
 
   def update_bacon_for(action_name, launch_date)
