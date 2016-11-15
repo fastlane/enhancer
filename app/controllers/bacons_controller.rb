@@ -33,29 +33,45 @@ class BaconsController < ApplicationController
       end
     end
 
-    send_analytic_ingester_event(params[:fastfile_id])
+    # Only report analytic ingester events for fastlane tool launches
+    if launches.size == 1 && launches['fastlane']
+      send_analytic_ingester_event(params[:fastfile_id], params[:error], params[:crash])
+    end
 
     render json: { success: true }
   end
 
-  def send_analytic_ingester_event(fastfile_id)
-    url = ENV["ANALYTIC_INGESTER_URL"]
-    @conn = Faraday.new(:url => url) do |faraday|
-      faraday.adapter  Faraday.default_adapter  # make requests with Net::HTTP
+  # This helps us track the success/failure of Fastfiles which are generated
+  # by an automated process, such as fastlane web onboarding
+  def send_analytic_ingester_event(fastfile_id, error, crash)
+    return unless ENV['ANALYTIC_INGESTER_URL'].present? && fastfile_id.present?
+
+    completion_status =  crash ? 'crash' : ( error ? 'error' : 'success')
+
+    Faraday.new(:url => ENV["ANALYTIC_INGESTER_URL"]).post do |req|
+      req.headers['Content-Type'] = 'application/json'
+      req.body = {
+        analytics: [{
+          event_source: {
+            oauth_app_name: 'fastlane-enhancer',
+            product: 'fastlane_web_onboarding'
+          },
+          actor: {
+            name:'customer',
+            detail: fastfile_id
+          },
+          action: {
+            name: 'fastfile_executed'
+          },
+          primary_target: {
+            name: 'fastlane_completion_status',
+            detail: completion_status
+          },
+          millis_since_epoch: Time.now.to_i * 1000,
+          version: 1
+        }]
+      }.to_json
     end
-
-    begin
-        @conn.post('', payload, { 'Content-Type' => 'application/json' } ) do |req|
-          req.options.open_timeout = 0.5
-          req.options.timeout = 1.0
-          yield(req) if block_given?
-        end
-      rescue Faraday::Error::TimeoutError, Faraday::ConnectionFailed => err
-        env = { :status => 504, :body => err }
-        Faraday::Response.new(env)
-      end
-
-
   end
 
   def update_bacon_for(action_name, launch_date)
