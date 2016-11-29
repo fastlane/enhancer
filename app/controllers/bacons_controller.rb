@@ -112,12 +112,13 @@ class BaconsController < ApplicationController
 
     @sums.sort! { |a, b| b[:ratio] <=> a[:ratio] }
 
+    @by_launches = @sums.sort { |a, b| b[:launches] <=> a[:launches] }
+
     if params[:top]
       top_percentage = params[:top].to_i / 100.0
       @sums = @sums.first(top_percentage * @sums.count)
+      @by_launches = @by_launches.first(top_percentage * @by_launches.count)
     end
-
-    @by_launches = @sums.sort { |a, b| b[:launches] <=> a[:launches] }
 
     @levels = [
       { value: 0.5, color: 'red' },
