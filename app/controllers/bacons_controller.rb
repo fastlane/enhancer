@@ -92,8 +92,8 @@ class BaconsController < ApplicationController
       num_weeks = params[:weeks].to_i
       cutoff_date = num_weeks.weeks.ago
 
-      launches.where("launch_date >= :cutoff_date", { cutoff_date: cutoff_date })
-      number_errors.where("launch_date >= :cutoff_date", { cutoff_date: cutoff_date })
+      launches = launches.where("launch_date >= :cutoff_date", { cutoff_date: cutoff_date })
+      number_errors = number_errors.where("launch_date >= :cutoff_date", { cutoff_date: cutoff_date })
     end
 
     @sums = []
