@@ -34,6 +34,8 @@ gem 'resque', '~> 1.27.2'
 
 gem 'foreman'
 
+gem 'pg'
+
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
@@ -54,6 +56,8 @@ group :development, :test do
   gem 'spring'
 
   gem 'sqlite3'
+
+  gem 'foreman'
 end
 
 group :production do
