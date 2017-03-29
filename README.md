@@ -42,8 +42,8 @@ Alternatively, add `opt_out_usage` to your `Fastfile`.
 * Create a `.env` file in your _enhancer_ project root containing the desired values for:
 
 ```
-ANALYTIC_INGESTER_URL=[the public URL for Analytic Ingester]
-FL_PASSWORD=[your desired password]
+ANALYTIC_INGESTER_URL=[the public URL for the Analytic Ingester service - can be omitted!]
+FL_PASSWORD=[password used to see the web dashboard]
 ```
 
 ## Getting a database snapshot
@@ -60,7 +60,7 @@ FL_PASSWORD=[your desired password]
 * Install with `brew install redis`
 * Run `redis-server /Users/mfurtak/homebrew/etc/redis.conf` in a tab that you keep around, or run `brew services start redis` to have it start up whenever your Mac does
 
-## Run the Rails and Sidekiq processes
+## Run the Rails and Resque processes
 
 Heroku uses something called a `Procfile` to track multiple processes that you want have started up, and a gem called `foreman` knows how to run these things for you locally
 
@@ -68,16 +68,11 @@ Heroku uses something called a `Procfile` to track multiple processes that you w
 
 ```
 $ bundle exec foreman start
-17:07:34 web.1    | started with pid 2902
-17:07:34 worker.1 | started with pid 2903
-17:07:36 web.1    | [2017-03-28 17:07:36] INFO  WEBrick 1.3.1
-17:07:36 web.1    | [2017-03-28 17:07:36] INFO  ruby 2.3.1 (2016-04-26) [x86_64-darwin16]
-17:07:36 web.1    | [2017-03-28 17:07:36] INFO  WEBrick::HTTPServer#start: pid=2902 port=5000
-17:07:36 worker.1 | 2017-03-28T21:07:36.874Z 2903 TID-owksahk4k INFO: Running in ruby 2.3.1p112 (2016-04-26 revision 54768) [x86_64-darwin16]
-17:07:36 worker.1 | 2017-03-28T21:07:36.874Z 2903 TID-owksahk4k INFO: See LICENSE and the LGPL-3.0 for licensing details.
-17:07:36 worker.1 | 2017-03-28T21:07:36.874Z 2903 TID-owksahk4k INFO: Upgrade to Sidekiq Pro for more features and support: http://sidekiq.org
-17:07:36 worker.1 | 2017-03-28T21:07:36.874Z 2903 TID-owksahk4k INFO: Booting Sidekiq 4.2.10 with redis options {:url=>nil}
-17:07:36 worker.1 | 2017-03-28T21:07:36.877Z 2903 TID-owksahk4k INFO: Starting processing, hit Ctrl-C to stop
+10:09:22 web.1    | started with pid 55133
+10:09:22 worker.1 | started with pid 55134
+10:09:24 web.1    | [2017-03-29 10:09:24] INFO  WEBrick 1.3.1
+10:09:24 web.1    | [2017-03-29 10:09:24] INFO  ruby 2.3.0 (2015-12-25) [x86_64-darwin16]
+10:09:24 web.1    | [2017-03-29 10:09:24] INFO  WEBrick::HTTPServer#start: pid=55133 port=5000
 ```
 
 **Note that this runs the web server on port 5000, rather than the typical 3000 for Rails**
