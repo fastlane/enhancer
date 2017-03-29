@@ -33,21 +33,26 @@ class BaconsController < ApplicationController
       end
     end
 
-    # Only report analytic ingester events for fastlane tool launches
-    if launches.size == 1 && launches['fastlane']
-      send_analytic_ingester_event(params[:fastfile_id], params[:error], params[:crash])
-    end
-
+    send_analytic_ingester_event(params[:fastfile_id], params[:error], params[:crash], launches)
+    
     render json: { success: true }
   end
 
   # This helps us track the success/failure of Fastfiles which are generated
   # by an automated process, such as fastlane web onboarding
-  def send_analytic_ingester_event(fastfile_id, error, crash)
+  def send_analytic_ingester_event(fastfile_id, error, crash, launches)
     return unless ENV['ANALYTIC_INGESTER_URL'].present? && fastfile_id.present?
 
-    AnalyticIngesterWorker.perform_async(fastfile_id, error, crash)
+
+    if launches.size == 1 && launches['fastlane'] 
+      AnalyticIngesterWorker.perform_async(crash, error, fastfile_id, 'fastlane')
+    else 
+      launches.each do |action, count|
+        AnalyticIngesterWorker.perform_async(crash, error, fastfile_id, action)
+      end
+    end
   end
+
 
   def update_bacon_for(action_name, launch_date)
     version = tool_version(action_name)
