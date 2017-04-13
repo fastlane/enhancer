@@ -10,12 +10,12 @@ class AnalyticIngesterWorker
 
     if fastfile_id.present? && launches.size == 1 && launches['fastlane']
       completion_status = crash.present? ? 'crash' : ( error.present? ? 'error' : 'success' )
-      analytics << fastlane_web_onboarding_event(fastfile_id, completion_status, timestamp_seconds)
+      analytics << event_for_web_onboarding(fastfile_id, completion_status, timestamp_seconds)
     end
 
     launches.each do |action, count|
       action_completion_status = action == crash ? 'crash' : ( action == error ? 'error' : 'success' )
-      analytics << fastlane_execution_event(action, count, action_completion_status, timestamp_seconds)
+      analytics << event_for_action_execution(action, count, action_completion_status, timestamp_seconds)
     end
 
     analytic_event_body = { analytics: analytics }.to_json
@@ -33,7 +33,7 @@ class AnalyticIngesterWorker
     puts "Sending analytic ingester event took #{(stop - start) * 1000}ms"
   end
 
-  def self.fastlane_web_onboarding_event(fastfile_id, completion_status, timestamp_seconds)
+  def self.event_for_web_onboarding(fastfile_id, completion_status, timestamp_seconds)
     {
       event_source: {
         oauth_app_name: 'fastlane-enhancer',
@@ -55,7 +55,7 @@ class AnalyticIngesterWorker
     }
   end
 
-  def self.fastlane_execution_event(action, count, completion_status, timestamp_seconds)
+  def self.event_for_action_execution(action, count, completion_status, timestamp_seconds)
     {
       event_source: {
         oauth_app_name: 'fastlane-enhancer',
