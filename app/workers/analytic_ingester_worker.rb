@@ -6,9 +6,10 @@ class AnalyticIngesterWorker
   def self.perform(fastfile_id, error, crash, launches, timestamp_seconds)
     start = Time.now
 
-    completion_status = crash.present? ? 'crash' : ( error.present? ? 'error' : 'success' )
     analytics = []
+
     if fastfile_id.present? && launches.size == 1 && launches['fastlane']
+      completion_status = crash.present? ? 'crash' : ( error.present? ? 'error' : 'success' )
       analytics << fastlane_web_onboarding_event(fastfile_id, completion_status, timestamp_seconds)
     end
 
@@ -39,7 +40,7 @@ class AnalyticIngesterWorker
         product: 'fastlane_web_onboarding'
       },
       actor: {
-        name:'customer',
+        name: 'customer',
         detail: fastfile_id
       },
       action: {
@@ -61,7 +62,7 @@ class AnalyticIngesterWorker
         product: 'fastlane'
       },
       actor: {
-        name:'action',
+        name: 'action',
         detail: action
       },
       action: {
